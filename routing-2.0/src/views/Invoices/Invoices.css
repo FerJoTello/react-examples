@@ -1,0 +1,8 @@
+.nav-option {
+    display: block;
+    margin: 1rem 0;
+}
+
+.nav-active {
+    color: red;
+}

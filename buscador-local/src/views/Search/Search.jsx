@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchBox from "./components/SearchBox/SearchBox";
 import "./Search.css"
 
-import data from "../../data/users.json"
 import SearchResults from "./components/SearchResults/SearchResults";
 
 const Search = () => {
 
     const [IsAtTop, setIsAtTop] = useState(false)
-    const [UserData, setUserData] = useState(data)
+    const [UserData, setUserData] = useState([])
     const [Results, setResults] = useState([])
+
+
+    useEffect(() => {
+        const getData = async () => {
+            const response = await fetch("https://jsonplaceholder.typicode.com/users").catch((error) => console.error("Error al hacer obtener la información ->", error))
+            if (!response || response.status != 200) {
+                setUserData([])
+                return
+            }
+            const json = await response.json().catch(null)
+            setUserData(json)
+        }
+        getData()
+    }, [])
 
 
     const handleSearchClick = (searchText) => {
@@ -37,7 +50,7 @@ const Search = () => {
     return (
         <div className={`search ${IsAtTop ? "search--top" : "search--center"}`}>
             <SearchBox onSearch={handleSearchClick} isSearching={IsAtTop} onClose={handleCloseClick}></SearchBox>
-            <SearchResults resultsList={Results} isSearching={IsAtTop}/>
+            <SearchResults resultsList={Results} isSearching={IsAtTop} />
         </div>
     )
 }
