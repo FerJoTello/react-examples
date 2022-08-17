@@ -21,17 +21,25 @@ const PokemonApiContext = createContext(null)
  */
 export const PokemonProvider = ({ children }) => {
     const [Pokemons, setPokemons] = useState([])
-
+    const [IsLoading, setIsLoading] = useState(false)
     /**
      * Hace una petición a la pokeapi y almacena el resultado de la petición en el state Pokemons
+     * 
      */
     const getPokemons = async () => {
-        const apiResult = await apiCall({ url: "https://pokeapi.co/api/v2/pokemon?limit=100" }).catch((err) => console.error(err))
-        if (!apiResult) {
+        try {
+            setIsLoading(true)
+            const apiResult = await apiCall({ url: "https://pokeapi.co/api/v2/pokemon?limit=100" })
+            setPokemons(apiResult.results)
+        } catch (error) {
             setPokemons([])
-            return Promise.reject(new Error("Hubo un problema al obtener la respuesta de la api"))
+            return {
+                message: "Hubo un problema al obtener la respuesta de la api",
+                error: error
+            }
+        } finally {
+            setIsLoading(false)
         }
-        setPokemons(apiResult.results)
     }
 
     /**
@@ -45,7 +53,7 @@ export const PokemonProvider = ({ children }) => {
     )
 
     return (
-        <PokemonStateContext.Provider value={Pokemons}>
+        <PokemonStateContext.Provider value={{ Pokemons, IsLoading }}>
             <PokemonApiContext.Provider value={api}>
                 {children}
             </PokemonApiContext.Provider>

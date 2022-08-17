@@ -6,9 +6,8 @@ import { useState } from "react"
 
 
 const Home = () => {
-    const Pokemons = usePokemonState()
+    const { Pokemons, IsLoading } = usePokemonState()
     const [ErrorGetPokemons, setErrorGetPokemons] = useState(false)
-    const [IsLoading, setIsLoading] = useState(true)
     const { getPokemons } = usePokemonApi()
 
 
@@ -17,13 +16,13 @@ const Home = () => {
             if (Pokemons.length > 0) {
                 return
             }
-            await getPokemons().catch((err) => {
+            const error = await getPokemons()
+            if (error) {
                 setErrorGetPokemons(true)
-                setIsLoading(false)
-            })
+                console.error(error.error)
+            }
         }
         initPokemons()
-        setIsLoading(false)
     }, [])
 
     return (

@@ -21,18 +21,29 @@ const PokemonDetailApiContext = createContext(null)
  */
 export const PokemonDetailProvider = ({ children }) => {
     const [PokemonDetail, setPokemonDetail] = useState({})
+    const [IsLoading, setIsLoading] = useState(true)
 
     /**
      * Hace una petición a la pokeapi y almacena el resultado de la petición en el state PokemonDetail
      * @param {number} id identificador único del pokemon
      */
     const getPokemonDetail = async (id) => {
-        const apiResult = await apiCall({ url: `https://pokeapi.co/api/v2/pokemon/${id}` }).catch((err) => console.error(err))
-        if (!apiResult) {
+        try {
+            setIsLoading(true)
+            const apiResult = await apiCall({ url: `https://pokeapi.co/api/v2/pokemon/${id}` }).catch((err) => { return { error: err } })
+            if (apiResult.error) {
+                throw apiResult.error
+            }
+            setPokemonDetail(apiResult)
+        } catch (error) {
             setPokemonDetail({})
-            return Promise.reject("No se pudo obtener la información del pokemon con el id proporcionado")
+            return {
+                message: "No se pudo obtener la información del pokemon con el id proporcionado",
+                error: error
+            }
+        } finally {
+            setIsLoading(false)
         }
-        setPokemonDetail(apiResult)
     }
 
     /**
@@ -46,7 +57,7 @@ export const PokemonDetailProvider = ({ children }) => {
     )
 
     return (
-        <PokemonDetailStateContext.Provider value={PokemonDetail}>
+        <PokemonDetailStateContext.Provider value={{ PokemonDetail, IsLoading }}>
             <PokemonDetailApiContext.Provider value={api}>
                 {children}
             </PokemonDetailApiContext.Provider>

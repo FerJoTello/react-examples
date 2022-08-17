@@ -5,26 +5,30 @@ import { usePokemonDetailStateContext, usePokemonDetailApiContext } from "../../
 
 
 const PokeDetail = () => {
-    const [IsLoading, setIsLoading] = useState(true)
     const { id } = useParams()
     const { getPokemonDetail } = usePokemonDetailApiContext()
-    const PokemonDetail = usePokemonDetailStateContext()
+    const { PokemonDetail, IsLoading } = usePokemonDetailStateContext()
+    const [ErrorGetDetail, setErrorGetDetail] = useState(false)
 
     useEffect(() => {
         const initComponent = async () => {
-            if (Number.parseInt(id,10) !== PokemonDetail.id) {
-                await getPokemonDetail(id).catch((err) => console.error(err))
+            if (Number.parseInt(id, 10) === PokemonDetail.id) {
+                return
             }
-            setIsLoading(false)
+            const error = await getPokemonDetail(id)
+            if (error) {
+                setErrorGetDetail(true)
+            }
         }
         initComponent()
     }, [])
     return (
         IsLoading ? (<p>Cargando info del pokemon...</p>) :
-            <div>
-                <div>{`#${PokemonDetail?.id} - ${PokemonDetail?.name}`}</div>
-                <img src={PokemonDetail?.sprites?.front_default} alt="imagen" />
-            </div>
+            ErrorGetDetail ? (<p>Hubo un problema para obtener la info del pokemon :c</p>) :
+                <div>
+                    <div>{`#${PokemonDetail?.id} - ${PokemonDetail?.name}`}</div>
+                    <img src={PokemonDetail?.sprites?.front_default} alt="imagen" />
+                </div>
     )
 }
 
